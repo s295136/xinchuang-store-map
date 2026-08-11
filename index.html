@@ -232,12 +232,14 @@
                 <div>
                   <div class="flex items-center gap-3">
                     <span id="detail-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full"></span>
-                    <span class="text-xs text-slate-400 font-semibold" id="detail-type-badge">面寬店鋪</span>
+                    <!-- 🎯 最適業態讀取 Q 欄位 -->
+                    <span class="text-xs text-slate-400 font-semibold" id="detail-type-badge">最適業態：餐飲旗艦</span>
                   </div>
                   <h2 class="text-2xl font-black mt-2 tracking-tight text-slate-900 dark:text-white" id="detail-title">福慧路215號</h2>
+                  <!-- 🎯 「門牌位置：」改成「銷售價格：」並讀取 N 欄位 -->
                   <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-semibold flex items-center gap-1">
-                    <i class="fa-solid fa-location-dot"></i>
-                    門牌位置：<span id="detail-road">福慧路</span>
+                    <i class="fa-solid fa-tag"></i>
+                    銷售價格：<span id="detail-total-sale-price">11,403萬元</span>
                   </p>
                 </div>
                 <div class="text-right">
@@ -278,20 +280,20 @@
                 </div>
               </div>
 
-              <!-- Overview Description (讀取 T 欄: 空間優勢) -->
+              <!-- 🎯 標題修正為：空間優勢評估 (讀取 T 欄) -->
               <div class="space-y-2">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <i class="fa-solid fa-crown text-amber-500"></i> 空間優勢評估 (T欄)
+                  <i class="fa-solid fa-crown text-amber-500"></i> 空間優勢評估
                 </h3>
                 <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-100 dark:border-slate-800" id="detail-desc">
                   臨福慧路黃金角池，雙面採光，具大基地地標採光優勢，是全區最高具地標能見度的首選黃金地標。
                 </p>
               </div>
 
-              <!-- Structural Features & Infrastructure Checklist (讀取 U 欄: 配套工程規格) -->
+              <!-- 🎯 標題修正為：配套工程規格 (讀取 U 欄) -->
               <div class="space-y-2">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <i class="fa-solid fa-gears text-indigo-500"></i> 配套工程規格 (U欄)
+                  <i class="fa-solid fa-gears text-indigo-500"></i> 配套工程規格
                 </h3>
                 <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-sans" id="detail-engineering">
                   高壓電力配電組、預留重油煙排煙風管、獨立污水排水系統、挑高樓板設計 (7.2m)、高容量排水水箱。
@@ -516,7 +518,7 @@
         <p class="font-bold text-indigo-600 dark:text-indigo-400">主要美化特點：</p>
         <ul class="list-disc list-inside space-y-1.5 pl-1">
           <li><strong>精準地理邊界</strong>：復原新知十路對外延展傾斜夾角，以及福慧路與新知八路路口形制。</li>
-          <li><strong>精確欄位抓取</strong>：空間優勢對應 T 欄、配套工程規格對應 U 欄。</li>
+          <li><strong>精確欄位抓取</strong>：最適業態(Q欄)、銷售價格(N欄)、空間優勢(T欄)、配套工程規格(U欄)。</li>
           <li><strong>平面圖與拆解面積</strong>：支援呈現第一層、第二層、第一層夾層、屋頂突出物及陽台之精細幾何坪數。</li>
           <li><strong>Google 試算表即時連動</strong>：連動試算表，即時拉取最新坪數、招商狀態、租金及進駐業者資訊。</li>
         </ul>
@@ -539,28 +541,28 @@
     
     const googleSheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSyoYzdaF7yap7C2zM6JCYnc0J73iZBChQBCruXS55iNZh5reqZVVEHgo8M0xrsO2ZcZPiQ6Db7-R2M/pub?gid=1548543533&single=true&output=csv';
 
-    // 🎯 精準三個狀態與對應 T 欄 (空間優勢)、U 欄 (配套工程規格) 備用資料庫
+    // 🎯 正確欄位解析備用資料庫 (Fallback Dataset)
     const shopsDataFallback = [
-      { id: "215", name: "福慧路215號", area: 123.06, status: "reserved", type: "餐飲旗艦", price: 135400, unitPrice: 1100, desc: "臨福慧路黃金角池，雙面採光，具大基地地標採光優勢，是全區最高具地標能見度的首選黃金地標。", road: "福慧路", originColor: "normal", tenant: "Cafe!N", engineering: "高壓電力配電組、預留重油煙排煙風管、獨立污水排水系統、挑高樓板設計 (7.2m)、高容量排水水箱", layers: { f1: 20.01, f2: 21.50, mezzanine: 6.66, roof: 15.77, balcony: 4.032 } },
-      { id: "213", name: "福慧路213號", area: 102.25, status: "rent_sale", type: "零售商場", price: 97200, unitPrice: 950, desc: "梧桐極高門面，臨福慧路主幹道人流交流處，挑高大氣，極具品牌尊榮感與美學展售空間的官網旗艦標竿。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、獨立分體式冷氣預留孔、弱電光纖網路基礎設施、挑高樓板設計 (7.2m)、獨立排水安全系統", layers: { f1: 16.04, f2: 17.24, mezzanine: 5.31, roof: 14.64, balcony: 3.233 } },
-      { id: "211", name: "福慧路211號", area: 102.28, status: "rent_sale", type: "特色咖啡", price: 92100, unitPrice: 900, desc: "採光充足，氛圍靜謐，前景極大，可完美打造精品戶外園藝咖啡館與文青生活風格沙龍型空間。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、輕食給排水管線、預留排煙專用風管、獨立分體式冷氣預留孔、挑高樓板設計 (7.2m)", layers: { f1: 16.06, f2: 17.26, mezzanine: 5.32, roof: 14.61, balcony: 3.236 } },
-      { id: "209", name: "福慧路209號", area: 106.76, status: "rent_sale", type: "科技展售", price: 96100, unitPrice: 900, desc: "大開間，簡化空間結構，利於自由佈局與展售陣列，是未來科技體驗展示中心或智慧家居創造的首選。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、備用發電機高架線路、高階專用地板電路網、挑高樓板設計 (7.2m)、中央冷氣出風口預留組", layers: { f1: 16.75, f2: 18.00, mezzanine: 5.60, roof: 15.25, balcony: 3.375 } },
-      { id: "207", name: "福慧路207號", area: 98.73, status: "rent_sale", type: "醫療美學", price: 88900, unitPrice: 900, desc: "高隱密性，動線獨立，專為高端尊榮客戶提供絕佳的隱私保護，最適合引進高端醫美美學診所、抗衰老中心與私人健康管理會所。", road: "福慧路", originColor: "normal", tenant: "", engineering: "獨立進排水氣控配線、高標準消毒通風管線、不斷電系統連接備用、高壓力電力配電組", layers: { f1: 15.59, f2: 16.70, mezzanine: 4.96, roof: 14.14, balcony: 3.142 } },
-      { id: "205", name: "福慧路205號", area: 109.14, status: "rent_sale", type: "共享辦公", price: 103700, unitPrice: 950, desc: "具鄰近社區人流動線交會，溫馨寧靜的內部空間，最適合打造結合圖書香、微型青創育育成中心與共享辦公室的複合式聚落。", road: "福慧路", originColor: "normal", tenant: "", engineering: "多孔高密度弱電網線、專用備用兩套發電機線路、高壓電力配電組、挑高樓板設計 (7.2m)、多功能防護監控系統", layers: { f1: 42.47, f2: 0, mezzanine: 12.49, roof: 0, balcony: 5.33 } },
-      { id: "203", name: "福慧路203號", area: 113.03, status: "rent_sale", type: "主題餐廳", price: 107400, unitPrice: 950, desc: "擁有極為完備的主力餐飲工程基礎，具備大流量獨立污水管道與專用排煙，可大幅降低餐飲業者裝修工程成本。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、預留排煙專用風管、獨立污水排水系統、挑高樓板設計 (7.2m)、重油排水分離槽", layers: { f1: 44.07, f2: 0, mezzanine: 13.02, roof: 0, balcony: 5.35 } },
-      { id: "201", name: "福慧路201號", area: 75.56, status: "rent_sale", type: "健身美體", price: 71800, unitPrice: 950, desc: "直挑高無樑柱結構，適合引進高端瑜珈沙龍、皮拉提斯專屬核心門店，或現代健身工作坊。", road: "福慧路", originColor: "normal", tenant: "", engineering: "防震高音質防震隔音牆、多功能獨立排水系統、高功率新風系統、預留大電量用電組、弱電光纖網路基礎設施", layers: { f1: 29.62, f2: 0, mezzanine: 8.77, roof: 0, balcony: 3.36 } },
-      { id: "199", name: "福慧路199號", area: 41.11, status: "rent_sale", type: "生活服務", price: 39100, unitPrice: 950, desc: "位於中庭香氛核心樞紐，精緻高坪效，適合作為智慧社區郵件收發室、生活便利服務、建築暗快收洗或精美美甲美睫工作室。", road: "福慧路", originColor: "grey", tenant: "", engineering: "給排水管道網組、高容量弱電網路線、獨立分體式冷氣預留孔、消防安全吸頂系統", layers: { f1: 17.07, f2: 0, mezzanine: 5.62, roof: 0, balcony: 0 } },
-      { id: "197", name: "福慧路197號", area: 67.79, status: "available", type: "潮流選品", price: 0, unitPrice: 0, desc: "大面寬落地玻璃展示櫥窗，動線順暢街角視覺焦點，獨立分體式冷氣預留孔，精緻光纖網路線組。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、獨立分體式冷氣預留孔、弱電光纖網路基礎設施", layers: { f1: 28.94, f2: 0, mezzanine: 8.47, roof: 0, balcony: 0 } },
-      { id: "195", name: "福慧路195號", area: 67.20, status: "available", type: "手作烘焙", price: 0, unitPrice: 0, desc: "精緻溫馨格局，臨福慧路，深受社區喜愛，適合烘焙與甜點店。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、預留烘焙烘烤專用風管、獨立給排水與排污管、獨立分體式冷氣預留孔", layers: { f1: 28.62, f2: 0, mezzanine: 8.47, roof: 0, balcony: 0 } },
-      { id: "193", name: "福慧路193號", area: 66.97, status: "available", type: "複合書店", price: 0, unitPrice: 0, desc: "靜謐氛圍，臨福慧路，適合社區書店、獨立沙龍。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高抗震牆面軌道架構、輕食給排水管網、弱電光纖網路基礎設施、獨立分體式冷氣預留孔", layers: { f1: 28.70, f2: 0, mezzanine: 8.27, roof: 0, balcony: 0 } },
-      { id: "191", name: "福慧路191號", area: 66.85, status: "available", type: "寵物會所", price: 0, unitPrice: 0, desc: "通風與採光良好，臨福慧路，設有獨立洗浴排氣，適合高端寵物會所。", road: "福慧路", originColor: "normal", tenant: "", engineering: "獨立進排水控線組、高標準寵物洗浴防堵排水網、高瓦數多孔插座配置、獨立高功率排煙通風管", layers: { f1: 28.63, f2: 0, mezzanine: 8.27, roof: 0, balcony: 0 } },
-      { id: "189", name: "福慧路189號", area: 63.19, status: "available", type: "便利超商", price: 0, unitPrice: 0, desc: "24小時不斷電高功率配電，便利商店大容量冰箱組，獨立高容量排水系統，雙門前超寬動線展示配置。", road: "福慧路角地", originColor: "normal", tenant: "", engineering: "24小時不斷電高功率配電、便利商店大容量冰箱組、獨立高容量排水系統、雙門前超寬動線展示配置", layers: { f1: 27.25, f2: 0, mezzanine: 7.63, roof: 0, balcony: 0 } },
-      { id: "13", name: "新知八路13號", area: 50.79, status: "available", type: "外帶輕食", price: 0, unitPrice: 0, desc: "輕食給排水管線、預留排煙專用風管、獨立分體式冷氣預留孔、弱電光纖網路基礎設施。", road: "新知八路", originColor: "cyan", tenant: "", engineering: "輕食給排水管線、預留排煙專用風管、獨立分體式冷氣預留孔、弱電光纖網路基礎設施", layers: { f1: 21.69, f2: 0, mezzanine: 6.36, roof: 0, balcony: 0 } },
-      { id: "11", name: "新知八路11號", area: 115.61, status: "available", type: "兒童教育", price: 0, unitPrice: 0, desc: "消防安全雙逃生出口，兒童安全避難專用動線，挑高樓板設計 (7.2m)，弱電光纖網路基礎設施，多孔高密度用電系統。", road: "新知八路", originColor: "yellow", tenant: "", engineering: "消防安全雙逃生出口、兒童安全避難專用動線、挑高樓板設計 (7.2m)、弱電光纖網路基礎設施、多孔高密度用電系統", layers: { f1: 50.24, f2: 0, mezzanine: 11.00, roof: 0, balcony: 2.62 } },
-      { id: "9", name: "新知八路9號", area: 109.73, status: "available", type: "生鮮超市", price: 0, unitPrice: 0, desc: "大容量櫃位卸貨卸貨平台動線，大型冷凍櫃專用高容量電箱，獨立給排水與排污管，高流量排風（7.2m）。", road: "新知八路", originColor: "cyan", tenant: "", engineering: "大容量櫃位卸貨卸貨平台動線、大型冷凍櫃專用高容量電箱、獨立給排水與排污管、高流量排風（7.2m）", layers: { f1: 46.22, f2: 0, mezzanine: 12.21, roof: 0, balcony: 2.19 } },
-      { id: "7", name: "新知八路7號", area: 55.53, status: "rent_sale", type: "藥妝零售", price: 61100, unitPrice: 1100, desc: "新知八路商業街兩側邊角地，雙面櫥窗，能見度極高，非常適合社區藥局、個人護理美妝連鎖專門門市。", road: "新知八路", originColor: "yellow", tenant: "", engineering: "大落地窗雙面櫥窗玻璃、高壓電力配電組、弱電光纖網路基礎設施、獨立分體式冷氣預留孔", layers: { f1: 22.16, f2: 0, mezzanine: 6.26, roof: 0, balcony: 2.22 } },
-      { id: "5", name: "新知八路5號", area: 57.42, status: "rent_sale", type: "連鎖餐飲", price: 57500, unitPrice: 1000, desc: "採光綠能長廊，已設置獨立高階排煙與給排水，合適引入優雅美客、高端精緻輕食、連鎖優質輕商餐飲。", road: "新知八路", originColor: "grey", tenant: "", engineering: "採光綠能長廊、已設置獨立高階排煙與給排水、高壓電力配電組、獨立分體式冷氣預留孔、消防水安全系統", layers: { f1: 24.72, f2: 0, mezzanine: 6.98, roof: 0, balcony: 0.00 } },
-      { id: "3", name: "新知八路3號", area: 113.40, status: "rent_sale", type: "銀行金融", price: 107800, unitPrice: 950, desc: "寬頁面，雙向獨立後門與黃金避震建築專用動線，適宜連鎖生鮮超市、大型美妝連鎖旗艦店，店面管理效率卓著。", road: "新知八路", originColor: "yellow", tenant: "", engineering: "金庫級防盜空調電氣網線組、金庫防爆結構預留、大挑高氣派大理石金庫面、高壓電力配電組、弱電光纖網路基礎設施", layers: { f1: 46.06, f2: 0, mezzanine: 13.12, roof: 0, balcony: 3.45 } }
+      { id: "215", name: "福慧路215號", area: 123.06, status: "reserved", type: "餐飲旗艦", price: 135400, unitPrice: 1100, salePrice: "11,403萬元", desc: "臨福慧路黃金角池，雙面採光，具大基地地標採光優勢，是全區最高具地標能見度的首選黃金地標。", road: "福慧路", originColor: "normal", tenant: "Cafe!N", engineering: "高壓電力配電組、預留重油煙排煙風管、獨立污水排水系統、挑高樓板設計 (7.2m)、高容量排水水箱", layers: { f1: 20.01, f2: 21.50, mezzanine: 6.66, roof: 15.77, balcony: 4.032 } },
+      { id: "213", name: "福慧路213號", area: 102.25, status: "rent_sale", type: "零售商場", price: 97200, unitPrice: 950, salePrice: "9,182萬元", desc: "梧桐極高門面，臨福慧路主幹道人流交流處，挑高大氣，極具品牌尊榮感與美學展售空間的官網旗艦標竿。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、獨立分體式冷氣預留孔、弱電光纖網路基礎設施、挑高樓板設計 (7.2m)、獨立排水安全系統", layers: { f1: 16.04, f2: 17.24, mezzanine: 5.31, roof: 14.64, balcony: 3.233 } },
+      { id: "211", name: "福慧路211號", area: 102.28, status: "rent_sale", type: "特色咖啡", price: 92100, unitPrice: 900, salePrice: "9,184萬元", desc: "採光充足，氛圍靜謐，前景極大，可完美打造精品戶外園藝咖啡館與文青生活風格沙龍型空間。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、輕食給排水管線、預留排煙專用風管、獨立分體式冷氣預留孔、挑高樓板設計 (7.2m)", layers: { f1: 16.06, f2: 17.26, mezzanine: 5.32, roof: 14.61, balcony: 3.236 } },
+      { id: "209", name: "福慧路209號", area: 106.76, status: "rent_sale", type: "科技展售", price: 96100, unitPrice: 900, salePrice: "9,584萬元", desc: "大開間，簡化空間結構，利於自由佈局與展售陣列，是未來科技體驗展示中心或智慧家居創造的首選。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、備用發電機高架線路、高階專用地板電路網、挑高樓板設計 (7.2m)、中央冷氣出風口預留組", layers: { f1: 16.75, f2: 18.00, mezzanine: 5.60, roof: 15.25, balcony: 3.375 } },
+      { id: "207", name: "福慧路207號", area: 98.73, status: "rent_sale", type: "醫療美學", price: 88900, unitPrice: 900, salePrice: "8,862萬元", desc: "高隱密性，動線獨立，專為高端尊榮客戶提供絕佳的隱私保護，最適合引進高端醫美美學診所、抗衰老中心與私人健康管理會所。", road: "福慧路", originColor: "normal", tenant: "", engineering: "獨立進排水氣控配線、高標準消毒通風管線、不斷電系統連接備用、高壓力電力配電組", layers: { f1: 15.59, f2: 16.70, mezzanine: 4.96, roof: 14.14, balcony: 3.142 } },
+      { id: "205", name: "福慧路205號", area: 109.14, status: "rent_sale", type: "共享辦公", price: 103700, unitPrice: 950, salePrice: "11,680萬元", desc: "具鄰近社區人流動線交會，溫馨寧靜的內部空間，最適合打造結合圖書香、微型青創育育成中心與共享辦公室的複合式聚落。", road: "福慧路", originColor: "normal", tenant: "", engineering: "多孔高密度弱電網線、專用備用兩套發電機線路、高壓電力配電組、挑高樓板設計 (7.2m)、多功能防護監控系統", layers: { f1: 42.47, f2: 0, mezzanine: 12.49, roof: 0, balcony: 5.33 } },
+      { id: "203", name: "福慧路203號", area: 113.03, status: "rent_sale", type: "主題餐廳", price: 107400, unitPrice: 950, salePrice: "12,068萬元", desc: "擁有極為完備的主力餐飲工程基礎，具備大流量獨立污水管道與專用排煙，可大幅降低餐飲業者裝修工程成本。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、預留排煙專用風管、獨立污水排水系統、挑高樓板設計 (7.2m)、重油排水分離槽", layers: { f1: 44.07, f2: 0, mezzanine: 13.02, roof: 0, balcony: 5.35 } },
+      { id: "201", name: "福慧路201號", area: 75.56, status: "rent_sale", type: "健身美體", price: 71800, unitPrice: 950, salePrice: "8,249萬元", desc: "直挑高無樑柱結構，適合引進高端瑜珈沙龍、皮拉提斯專屬核心門店，或現代健身工作坊。", road: "福慧路", originColor: "normal", tenant: "", engineering: "防震高音質防震隔音牆、多功能獨立排水系統、高功率新風系統、預留大電量用電組、弱電光纖網路基礎設施", layers: { f1: 29.62, f2: 0, mezzanine: 8.77, roof: 0, balcony: 3.36 } },
+      { id: "199", name: "福慧路199號", area: 41.11, status: "rent_sale", type: "生活服務", price: 39100, unitPrice: 950, salePrice: "4,450萬元", desc: "位於中庭香氛核心樞紐，精緻高坪效，適合作為智慧社區郵件收發室、生活便利服務、建築暗快收洗或精美美甲美睫工作室。", road: "福慧路", originColor: "grey", tenant: "", engineering: "給排水管道網組、高容量弱電網路線、獨立分體式冷氣預留孔、消防安全吸頂系統", layers: { f1: 17.07, f2: 0, mezzanine: 5.62, roof: 0, balcony: 0 } },
+      { id: "197", name: "福慧路197號", area: 67.79, status: "available", type: "潮流選品", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "大面寬落地玻璃展示櫥窗，動線順暢街角視覺焦點，獨立分體式冷氣預留孔，精緻光纖網路線組。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、獨立分體式冷氣預留孔、弱電光纖網路基礎設施", layers: { f1: 28.94, f2: 0, mezzanine: 8.47, roof: 0, balcony: 0 } },
+      { id: "195", name: "福慧路195號", area: 67.20, status: "available", type: "手作烘焙", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "精緻溫馨格局，臨福慧路，深受社區喜愛，適合烘焙與甜點店。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高壓電力配電組、預留烘焙烘烤專用風管、獨立給排水與排污管、獨立分體式冷氣預留孔", layers: { f1: 28.62, f2: 0, mezzanine: 8.47, roof: 0, balcony: 0 } },
+      { id: "193", name: "福慧路193號", area: 66.97, status: "available", type: "複合書店", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "靜謐氛圍，臨福慧路，適合社區書店、獨立沙龍。", road: "福慧路", originColor: "normal", tenant: "", engineering: "高抗震牆面軌道架構、輕食給排水管網、弱電光纖網路基礎設施、獨立分體式冷氣預留孔", layers: { f1: 28.70, f2: 0, mezzanine: 8.27, roof: 0, balcony: 0 } },
+      { id: "191", name: "福慧路191號", area: 66.85, status: "available", type: "寵物會所", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "通風與採光良好，臨福慧路，設有獨立洗浴排氣，適合高端寵物會所。", road: "福慧路", originColor: "normal", tenant: "", engineering: "獨立進排水控線組、高標準寵物洗浴防堵排水網、高瓦數多孔插座配置、獨立高功率排煙通風管", layers: { f1: 28.63, f2: 0, mezzanine: 8.27, roof: 0, balcony: 0 } },
+      { id: "189", name: "福慧路189號", area: 63.19, status: "available", type: "便利超商", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "24小時不斷電高功率配電，便利商店大容量冰箱組，獨立高容量排水系統，雙門前超寬動線展示配置。", road: "福慧路角地", originColor: "normal", tenant: "", engineering: "24小時不斷電高功率配電、便利商店大容量冰箱組、獨立高容量排水系統、雙門前超寬動線展示配置", layers: { f1: 27.25, f2: 0, mezzanine: 7.63, roof: 0, balcony: 0 } },
+      { id: "13", name: "新知八路13號", area: 50.79, status: "available", type: "外帶輕食", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "輕食給排水管線、預留排煙專用風管、獨立分體式冷氣預留孔、弱電光纖網路基礎設施。", road: "新知八路", originColor: "cyan", tenant: "", engineering: "輕食給排水管線、預留排煙專用風管、獨立分體式冷氣預留孔、弱電光纖網路基礎設施", layers: { f1: 21.69, f2: 0, mezzanine: 6.36, roof: 0, balcony: 0 } },
+      { id: "11", name: "新知八路11號", area: 115.61, status: "available", type: "兒童教育", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "消防安全雙逃生出口，兒童安全避難專用動線，挑高樓板設計 (7.2m)，弱電光纖網路基礎設施，多孔高密度用電系統。", road: "新知八路", originColor: "yellow", tenant: "", engineering: "消防安全雙逃生出口、兒童安全避難專用動線、挑高樓板設計 (7.2m)、弱電光纖網路基礎設施、多孔高密度用電系統", layers: { f1: 50.24, f2: 0, mezzanine: 11.00, roof: 0, balcony: 2.62 } },
+      { id: "9", name: "新知八路9號", area: 109.73, status: "available", type: "生鮮超市", price: 0, unitPrice: 0, salePrice: "面議 / 非銷售戶", desc: "大容量櫃位卸貨卸貨平台動線，大型冷凍櫃專用高容量電箱，獨立給排水與排污管，高流量排風（7.2m）。", road: "新知八路", originColor: "cyan", tenant: "", engineering: "大容量櫃位卸貨卸貨平台動線、大型冷凍櫃專用高容量電箱、獨立給排水與排污管、高流量排風（7.2m）", layers: { f1: 46.22, f2: 0, mezzanine: 12.21, roof: 0, balcony: 2.19 } },
+      { id: "7", name: "新知八路7號", area: 55.53, status: "rent_sale", type: "藥妝零售", price: 61100, unitPrice: 1100, salePrice: "7,700萬元", desc: "新知八路商業街兩側邊角地，雙面櫥窗，能見度極高，非常適合社區藥局、個人護理美妝連鎖專門門市。", road: "新知八路", originColor: "yellow", tenant: "", engineering: "大落地窗雙面櫥窗玻璃、高壓電力配電組、弱電光纖網路基礎設施、獨立分體式冷氣預留孔", layers: { f1: 22.16, f2: 0, mezzanine: 6.26, roof: 0, balcony: 2.22 } },
+      { id: "5", name: "新知八路5號", area: 57.42, status: "rent_sale", type: "連鎖餐飲", price: 57500, unitPrice: 1000, salePrice: "7,050萬元", desc: "採光綠能長廊，已設置獨立高階排煙與給排水，合適引入優雅美客、高端精緻輕食、連鎖優質輕商餐飲。", road: "新知八路", originColor: "grey", tenant: "", engineering: "採光綠能長廊、已設置獨立高階排煙與給排水、高壓電力配電組、獨立分體式冷氣預留孔、消防水安全系統", layers: { f1: 24.72, f2: 0, mezzanine: 6.98, roof: 0, balcony: 0.00 } },
+      { id: "3", name: "新知八路3號", area: 113.40, status: "rent_sale", type: "銀行金融", price: 107800, unitPrice: 950, salePrice: "10,800萬元", desc: "寬頁面，雙向獨立後門與黃金避震建築專用動線，適宜連鎖生鮮超市、大型美妝連鎖旗艦店，店面管理效率卓著。", road: "新知八路", originColor: "yellow", tenant: "", engineering: "金庫級防盜空調電氣網線組、金庫防爆結構預留、大挑高氣派大理石金庫面、高壓電力配電組、弱電光纖網路基礎設施", layers: { f1: 46.06, f2: 0, mezzanine: 13.12, roof: 0, balcony: 3.45 } }
     ];
 
     let shopsData = JSON.parse(JSON.stringify(shopsDataFallback));
@@ -621,7 +623,7 @@
             headerSyncBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> 🟢 雲端試算表同步成功`;
 
             if (sheetSyncLight) sheetSyncLight.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-            if (sheetSyncStatusMsg) sheetSyncStatusMsg.innerText = `連線成功！已於 ${timeStr} 同步共 ${shopsData.length} 筆門牌明細，包含 T 欄 (空間優勢) 及 U 欄 (配套工程規格)。`;
+            if (sheetSyncStatusMsg) sheetSyncStatusMsg.innerText = `連線成功！已於 ${timeStr} 同步共 ${shopsData.length} 筆門牌明細 (抓取 N欄銷售總價、Q欄最適業態、T欄空間優勢、U欄工程規格)。`;
 
             recalculateMetrics();
             renderSVGMap();
@@ -673,10 +675,11 @@
       document.getElementById('metric-leased-rate').innerText = `${leasedRate}%`;
     }
 
-    // 🎯 精準對應試算表欄位索引 (Index mapping)：
-    // A(0):門牌, B(1):所有權人, C(2):面積, D(3):專有面積, E(4):一層面積, F(5):夾層, G(6):二層, H(7):屋突, I(8):陽台
-    // J(9):狀態, K(10):月租金, L(11):租金單價, M(12):售價單價, N(13):售價總價, O(14):建議核心業態, P(15):路段, Q(16):預計進駐
-    // T(19):空間優勢, U(20):配套工程規格
+    // 🎯 精準對應 Google 試算表欄位索引：
+    // A(0):門牌號碼, B(1):所有權人, C(2):面積, D(3):專有面積, E(4):一層面積, F(5):夾層, G(6):二層, H(7):屋突, I(8):陽台
+    // J(9):狀態, K(10):月租金, L(11):租金單價, M(12):售價單價, N(13):售價總價(銷售價格)
+    // O(14):建議核心業態, P(15):路段, Q(16):最適業態, R(17):預計進駐
+    // T(19):空間優勢評估, U(20):配套工程規格
     function mapCSVRowToShop(row) {
       const rawName = row[0]?.trim(); 
       if (!rawName) return null;
@@ -708,13 +711,19 @@
       const unitPriceMatch = unitPriceStr.match(/\d+/);
       const unitPrice = unitPriceMatch ? parseInt(unitPriceMatch[0]) : (area > 0 ? Math.round(price / area) : 0);
 
-      const type = row[14]?.trim() || "商業空間";
+      // 🎯 讀取 N 欄位 (售價總價 -> 銷售價格)
+      const salePrice = row[13]?.trim() || (price > 0 ? "面議 / 歡迎洽詢" : "非銷售戶 / 地主戶");
+
       const road = row[15]?.trim() || "連外道路";
-      const tenant = row[16]?.trim() || "";
       
-      // 🎯 精準抓取 T 欄 (空間優勢) & U 欄 (配套工程規格)
-      const desc = row[19]?.trim() || (row[17]?.trim() || "空間格局優良，適合多元商業展示與門店規劃。");
-      const engineering = row[20]?.trim() || (row[18]?.trim() || "高壓電力配電組、弱電光纖網路基礎設施、獨立分體式冷氣預留孔。");
+      // 🎯 讀取 Q 欄位 (最適業態)
+      const type = row[16]?.trim() || (row[14]?.trim() || "商業空間");
+      
+      const tenant = row[17]?.trim() || "";
+      
+      // 🎯 讀取 T 欄 (空間優勢) & U 欄 (配套工程規格)
+      const desc = row[19]?.trim() || "空間格局優良，雙面採光，極具店面能見度。";
+      const engineering = row[20]?.trim() || "高壓電力配電組、獨立分體式冷氣預留孔、弱電光纖網路基礎設施。";
 
       const localBlueprint = shopsDataFallback.find(s => s.id === id);
       const originColor = localBlueprint ? localBlueprint.originColor : "normal";
@@ -727,6 +736,7 @@
         type,
         price,
         unitPrice,
+        salePrice,
         desc,
         road,
         originColor,
@@ -920,9 +930,11 @@
       document.getElementById('detail-title').innerText = shop.name;
       document.getElementById('detail-area').innerHTML = `${shop.area} <span class="text-lg font-normal font-sans text-slate-500">坪</span>`;
       document.getElementById('detail-area-m2').innerText = `${(shop.area * 3.3058).toFixed(1)} 平方公尺`;
-      document.getElementById('detail-road').innerText = shop.road;
       
-      // 🎯 讀取 T 欄 (空間優勢)
+      // 🎯 銷售價格 (讀取 N 欄位)
+      document.getElementById('detail-total-sale-price').innerText = shop.salePrice;
+      
+      // 🎯 空間優勢評估 (讀取 T 欄位)
       document.getElementById('detail-desc').innerText = shop.desc;
       
       const rentText = shop.price > 0 ? `NT$ ${shop.price.toLocaleString()}` : '洽談中 / 地主戶';
@@ -931,7 +943,9 @@
       const rentUnitText = shop.unitPrice > 0 ? `約 $${shop.unitPrice.toLocaleString()}/坪` : '意者面議';
       document.getElementById('detail-rent-unit').innerText = rentUnitText;
 
+      // 🎯 最適業態 (讀取 Q 欄位)
       document.getElementById('detail-type-badge').innerText = `最適業態：${shop.type}`;
+      document.getElementById('detail-industry').innerHTML = `<i class="fa-solid fa-shop text-indigo-500"></i> ${shop.type}`;
 
       const tenantText = shop.tenant && shop.tenant.trim() !== "" ? shop.tenant : "目前無填寫 / 開放接洽";
       document.getElementById('detail-tenant').innerText = tenantText;
@@ -939,7 +953,7 @@
       const unitValText = shop.unitPrice > 0 ? `NT$ ${shop.unitPrice.toLocaleString()} /坪` : '面議';
       document.getElementById('detail-unit-price').innerText = unitValText;
 
-      // 🎯 讀取 U 欄 (配套工程規格)
+      // 🎯 配套工程規格 (讀取 U 欄位)
       if (document.getElementById('detail-engineering')) {
         document.getElementById('detail-engineering').innerText = shop.engineering;
       }
@@ -1154,12 +1168,12 @@
 
     function exportToCSV() {
       let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "店面門牌號碼,權狀面積(坪),第一層(坪),第二層(坪),夾層(坪),招商狀態,月租金(元),建議業態,臨路位置,預計進駐業者,空間優勢(T欄),配套工程規格(U欄)\n";
+      csvContent += "店面門牌號碼,權狀面積(坪),第一層(坪),第二層(坪),夾層(坪),招商狀態,月租金(元),銷售總價(N欄),建議業態(Q欄),臨路位置,預計進駐業者,空間優勢(T欄),配套工程規格(U欄)\n";
 
       shopsData.forEach(shop => {
         const l = shop.layers || {};
         const statusText = shop.status === 'reserved' ? '洽談/業者評估中 (Reserved)' : shop.status === 'rent_sale' ? '可租｜可售' : '可承租(Available)';
-        csvContent += `${shop.name},${shop.area},${l.f1 || 0},${l.f2 || 0},${l.mezzanine || 0},${statusText},${shop.price},${shop.type},${shop.road},${shop.tenant},"${shop.desc}","${shop.engineering}"\n`;
+        csvContent += `${shop.name},${shop.area},${l.f1 || 0},${l.f2 || 0},${l.mezzanine || 0},${statusText},${shop.price},${shop.salePrice},${shop.type},${shop.road},${shop.tenant},"${shop.desc}","${shop.engineering}"\n`;
       });
 
       const encodedUri = encodeURI(csvContent);
