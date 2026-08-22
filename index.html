@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新創店面招商地圖與資產管理系統</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- 獨立樣式表 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 font-sans antialiased">
+
+  <div class="flex flex-col h-screen overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex flex-shrink-0 justify-between items-center z-10">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 dark:shadow-none">
+          <i class="fa-solid fa-map-location-dot text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            新創店面招商與資產管理系統
+            <span class="text-xs bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 px-2 py-0.5 rounded-full font-medium">
+              Sheet 雲端連動版
+            </span>
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+            <span>臨 福慧路 · 新知八路 · 新知十路 完美核心商業街廓</span>
+            <span class="h-3 w-[1px] bg-slate-200 dark:bg-slate-800"></span>
+            <span id="header-sync-badge" class="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200">
+              <i class="fa-solid fa-circle-notch animate-spin"></i> 正在初始化...
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Header Controls -->
+      <div class="flex items-center gap-3">
+        <button id="style-toggle" onclick="toggleStyleMode()" class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          <i class="fa-solid fa-palette text-amber-500"></i>
+          <span>著色風格: <strong id="style-mode-label">現代狀態</strong></span>
+        </button>
+
+        <button onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition" title="切換深淺主題">
+          <i class="fa-solid fa-moon dark:hidden"></i>
+          <i class="fa-solid fa-sun hidden dark:block"></i>
+        </button>
+
+        <button onclick="openHelpModal()" class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition">
+          <i class="fa-solid fa-circle-question"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Left Panel: Interactive Map and Filter Controls -->
+      <div class="w-7/12 flex flex-col border-r border-slate-200 dark:border-slate-800 h-full">
+        <!-- Filter & Metrics Bar -->
+        <div class="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center justify-between">
+          <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" id="shop-search" oninput="filterShops()" placeholder="搜尋店號 (如 215, Cafe!N)..." class="w-full pl-9 pr-4 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <select id="status-filter" onchange="filterShops()" class="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">所有招商狀態</option>
+              <option value="reserved">洽談/業者評估中 (Reserved)</option>
+              <option value="rent_sale">可租｜可售</option>
+              <option value="available">可承租 (Available)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-4 text-xs font-mono text-slate-500 dark:text-slate-400">
+            <div>
+              總店面: <span id="metric-total-count" class="font-bold text-slate-900 dark:text-white">20</span> 間
+            </div>
+            <div class="h-4 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
+            <div>
+              總面積: <span id="metric-total-area" class="font-bold text-slate-900 dark:text-white">1,706.40</span> 坪
+            </div>
+            <div class="h-4 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
+            <div>
+              出租率: <span id="metric-leased-rate" class="font-bold text-indigo-600 dark:text-indigo-400">0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Map Container with CAD Grid -->
+        <div class="flex-1 relative overflow-hidden bg-slate-100 dark:bg-slate-950 cad-grid p-6 flex items-center justify-center">
+          <div class="absolute top-4 left-4 bg-white/85 dark:bg-slate-900/85 backdrop-blur px-3 py-2.5 rounded-lg border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-1 z-10 pointer-events-none">
+            <div class="flex items-center gap-2">
+              <div class="relative w-6 h-6 flex items-center justify-center">
+                <i class="fa-solid fa-location-arrow text-indigo-600 text-lg rotate-[-45deg] animate-pulse"></i>
+              </div>
+              <span class="text-xs font-bold font-mono">正北方位</span>
+            </div>
+            <div class="h-[1px] bg-slate-200 dark:bg-slate-800 my-1"></div>
+            <span class="text-[10px] text-slate-500">地理指引修正版 (1/1500)</span>
+          </div>
+
+          <div class="absolute bottom-4 left-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg flex gap-1 z-10">
+            <button onclick="setMapMode('status')" id="btn-mode-status" class="px-2.5 py-1.5 text-xs font-medium rounded-lg transition bg-indigo-600 text-white shadow-sm">
+              <i class="fa-solid fa-circle-check mr-1.5"></i>招商狀態
+            </button>
+            <button onclick="setMapMode('size')" id="btn-mode-size" class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              <i class="fa-solid fa-chart-pie mr-1.5"></i>坪數熱力
+            </button>
+            <button onclick="setMapMode('type')" id="btn-mode-type" class="px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              <i class="fa-solid fa-tags mr-1.5"></i>建議業態
+            </button>
+          </div>
+
+          <div id="svg-map-wrapper" class="w-full h-full max-h-[580px] max-w-[850px] flex items-center justify-center select-none transition-transform duration-300">
+          </div>
+        </div>
+
+        <div class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-center gap-6 text-xs font-medium">
+          <div id="legend-item-1" class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-amber-500/20 border-2 border-amber-500"></span>
+            <span>洽談/業者評估中 (Reserved)</span>
+          </div>
+          <div id="legend-item-2" class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-blue-500/20 border-2 border-blue-500"></span>
+            <span>可租｜可售</span>
+          </div>
+          <div id="legend-item-3" class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-emerald-500/20 border-2 border-emerald-500"></span>
+            <span>可承租 (Available)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Shop Profile, AI Tools & Table View -->
+      <div class="w-5/12 flex flex-col h-full bg-white dark:bg-slate-900">
+        <div class="border-b border-slate-200 dark:border-slate-800 flex bg-slate-50 dark:bg-slate-950">
+          <button onclick="switchTab('profile')" id="tab-btn-profile" class="flex-1 py-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-shop"></i>店面詳情
+          </button>
+          <button onclick="switchTab('ai-suite')" id="tab-btn-ai-suite" class="flex-1 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-900 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>AI 實境規劃
+          </button>
+          <button onclick="switchTab('database')" id="tab-btn-database" class="flex-1 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-900 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-database"></i>資產資料庫
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6">
+          
+          <!-- Tab 1: Shop Profile -->
+          <div id="tab-profile" class="block space-y-6">
+            <div id="no-selection-state" class="flex flex-col items-center justify-center py-20 text-center text-slate-400 dark:text-slate-500">
+              <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-arrow-pointer text-2xl text-slate-400"></i>
+              </div>
+              <p class="font-medium text-slate-700 dark:text-slate-300">請在地圖上點擊任何店鋪</p>
+              <p class="text-xs mt-1">即可查閱該店面的詳細坪數、平面圖及各層面積</p>
+            </div>
+
+            <!-- Detail State -->
+            <div id="detail-state" class="hidden space-y-6">
+              <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex justify-between items-start">
+                <div>
+                  <div class="flex items-center gap-3">
+                    <span id="detail-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full"></span>
+                    <span class="text-xs text-slate-400 font-semibold" id="detail-type-badge"></span>
+                  </div>
+                  <h2 class="text-2xl font-black mt-2 tracking-tight text-slate-900 dark:text-white" id="detail-title">福慧路215號</h2>
+                  <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-tag"></i>
+                    銷售價格：<span id="detail-total-sale-price">11,403萬元</span>
+                  </p>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-slate-400">權狀面積</div>
+                  <div class="text-3xl font-black text-slate-900 dark:text-white font-mono" id="detail-area">123.06 <span class="text-lg font-normal font-sans text-slate-500">坪</span></div>
+                  <div class="text-[10px] text-slate-400 mt-0.5" id="detail-area-m2">406.8 平方公尺</div>
+                </div>
+              </div>
+
+              <!-- Key Specs -->
+              <div class="grid grid-cols-2 gap-4">
+                <div class="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                  <span class="text-[10px] text-slate-400 block mb-0.5">預估月租金</span>
+                  <span class="text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400" id="detail-rent">NT$ 135,400</span>
+                  <span class="text-[10px] text-slate-400 block mt-0.5" id="detail-rent-unit">約 1,100元/坪</span>
+                </div>
+                <div class="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                  <span class="text-[10px] text-slate-400 block mb-0.5">建議核心業態</span>
+                  <span class="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5" id="detail-industry">
+                  </span>
+                  <span class="text-[10px] text-slate-400 block mt-0.5">最適格局規劃</span>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl border border-emerald-100 dark:border-emerald-900 bg-emerald-50/20 dark:bg-emerald-950/10 shadow-sm flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] text-slate-400 block mb-0.5">預計進駐業者 / 接洽品牌</span>
+                  <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-building-circle-check text-emerald-500"></i>
+                    <span id="detail-tenant">Cafe!N</span>
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-400 block mb-0.5">估算售價單價</span>
+                  <span class="text-xs font-mono font-bold" id="detail-unit-price">91.23萬/坪</span>
+                </div>
+              </div>
+
+              <!-- 空間優勢評估 -->
+              <div class="space-y-2">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-crown text-amber-500"></i> 空間優勢評估
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-100 dark:border-slate-800" id="detail-desc">
+                </p>
+              </div>
+
+              <!-- 配套工程規格 -->
+              <div class="space-y-2">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-gears text-indigo-500"></i> 配套工程規格
+                </h3>
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-sans" id="detail-engineering">
+                </div>
+              </div>
+
+              <!-- Floor Plan & Breakdown Section -->
+              <div class="space-y-3 pt-2">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <i class="fa-solid fa-ruler-combined text-indigo-500"></i> 平面圖與各層面積拆解
+                </h3>
+                
+                <div class="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                  <div class="w-full md:w-1/2 min-h-[160px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 p-3 flex flex-col items-center justify-center relative select-none">
+                    <span class="text-[10px] font-bold text-slate-400 absolute top-2 left-3 font-mono">CAD FLOOR PLAN</span>
+                    
+                    <div id="floorplan-svg-container" class="w-full h-32 flex items-center justify-center">
+                    </div>
+                  </div>
+
+                  <div class="w-full md:w-1/2 space-y-2" id="floorplan-breakdown-list">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: AI Suite -->
+          <div id="tab-ai-suite" class="hidden space-y-6">
+            <!-- 建物標示圖 -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                  <i class="fa-solid fa-file-image text-indigo-500"></i> 建物標示圖
+                </h3>
+                <span id="building-plan-title" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-bold">福慧路215號</span>
+              </div>
+              
+              <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-950 min-h-[160px] flex items-center justify-center p-2 relative group">
+                <img id="building-plan-img" src="" alt="建物標示圖" class="max-h-[260px] w-auto object-contain cursor-zoom-in transition-transform duration-200 group-hover:scale-[1.02]" onclick="openLightbox(this.src)">
+                <div id="building-plan-fallback" class="hidden py-8 flex flex-col items-center gap-2 text-slate-400">
+                  <i class="fa-solid fa-image-portrait text-3xl"></i>
+                  <span class="text-xs font-medium"> pic/ 資料夾暫無此戶建物標示圖</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Full Database -->
+          <div id="tab-database" class="hidden space-y-4">
+            <div class="p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-50/50 to-indigo-100/10 dark:from-indigo-950/20 dark:to-slate-900 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="sheet-sync-light"></span>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                    Google 試算表即時連動中
+                  </h4>
+                </div>
+                <p class="text-[10px] text-slate-400">
+                  資料來源：<a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSyoYzdaF7yap7C2zM6JCYnc0J73iZBChQBCruXS55iNZh5reqZVVEHgo8M0xrsO2ZcZPiQ6Db7-R2M/pubhtml?gid=1548543533" target="_blank" class="text-indigo-500 hover:underline font-mono">新創店面公開發佈試算表 <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i></a>
+                </p>
+                <div class="text-[10px] text-slate-500" id="sheet-sync-status-msg">
+                  上次自動同步時間：尚未同步
+                </div>
+              </div>
+              <button onclick="syncWithGoogleSheet()" class="w-full md:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-100 dark:shadow-none">
+                <i class="fa-solid fa-rotate"></i> 重新同步試算表
+              </button>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">全區店面資產明細清單</h3>
+              <button onclick="exportToCSV()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition">
+                <i class="fa-solid fa-file-csv"></i> 匯出 CSV 檔
+              </button>
+            </div>
+
+            <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold border-b border-slate-200 dark:border-slate-800">
+                    <th class="p-3">店面門牌號碼</th>
+                    <th class="p-3">權狀面積 (坪)</th>
+                    <th class="p-3">招商狀態</th>
+                    <th class="p-3">月租金(元)</th>
+                    <th class="p-3">建議業態 / 預計進駐</th>
+                  </tr>
+                </thead>
+                <tbody id="db-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="help-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+      <div class="flex justify-between items-start">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot text-indigo-500"></i> 「新創店面」設計說明
+        </h3>
+        <button onclick="closeHelpModal()" class="text-slate-400 hover:text-slate-500">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        <p>本系統依據建築位置圖進行向量美化重製，並即時連動 Google 試算表。</p>
+      </div>
+      <div class="flex justify-end">
+        <button onclick="closeHelpModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 cursor-pointer" onclick="closeLightbox()">
+    <div class="relative max-w-4xl max-h-[90vh]">
+      <img id="lightbox-img" src="" alt="放大標示圖" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl border border-slate-700">
+      <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white text-xl hover:text-indigo-400">
+        <i class="fa-solid fa-xmark"></i> 關閉全螢幕
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Wrapper -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+  <!-- 模組化腳本載入順序 -->
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
