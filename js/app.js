@@ -76,3 +76,10 @@ function exportToCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
+// ==========================================
+// 全域事件相容橋接 (相容 HTML 原生 inline handlers)
+// ==========================================
+window.selectShop = (id) => UI.selectShop(id);
+window.filterShops = () => UI.filterShops();
+window.switchTab = (tab) => UI.switchTab(tab);
